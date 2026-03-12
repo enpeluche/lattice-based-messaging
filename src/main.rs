@@ -1,14 +1,17 @@
 mod matrix;
 use matrix::Matrix;
 
+mod vector;
+use vector::Vector;
+
 fn main() {
-    let mut m = Matrix::new(3, 3);
+    let m = Matrix::random(3, 3);
     
-    m.set(0, 0, 1.0);
-    m.set(1, 1, 1.0);
-    m.set(2, 2, 1.0);
-    
-    println!("Ma matrice identité :");
+    println!("Ma matrice :");
     m.display();
+    println!("somme");
+    (&m+&m.transpose()).display();
 }
 // je suis un commentaire !
+
+// on adopte quelle convention ? 

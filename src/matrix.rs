@@ -1,3 +1,11 @@
+use std::f64;
+use rand::Rng;
+use std::ops::Add;
+use std::ops::Sub;
+use std::ops::Mul;
+
+use crate::vector::Vector;
+
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
@@ -8,17 +16,50 @@ impl Matrix {
     pub fn new(rows: usize, cols: usize) -> Self {
         let data = vec![vec![0.0; cols]; rows];
 
-        Self{ rows, cols, data}
+        Self{rows, cols, data}
+    }
+
+    pub fn identity(size: usize) -> Self {
+        let mut data = vec![vec![0.0; size]; size];
+
+        for i in 0..size {
+            data[i][i] = 1.0;
+        }
+        Self{rows: size, cols: size, data}
+    }
+
+    pub fn random(rows: usize, cols: usize) -> Self {
+        let mut rng = rand::thread_rng();
+        
+        let mut mat = Self::new(rows, cols);
+
+        for r in 0..rows {
+            for c in 0..cols {
+                mat.data[r][c] = rng.r#gen::<f64>();
+            }
+        }
+
+        mat
     }
 
     pub fn set(&mut self, r: usize, c: usize, val: f64) {
         if r < self.rows && c < self.cols {
             self.data[r][c] = val;
         } else {
-            // En Rust, on évite les print de debug, 
-            // mais pour l'instant on va juste ignorer les mauvais indices.
             eprintln!("Erreur : Index ({}, {}) hors limites", r, c);
         }
+    }
+
+    pub fn transpose(&self) -> Self {
+        let mut mat = Matrix::new(self.cols, self.rows);
+
+        for i in 0..self.rows {
+            for j in 0..self.cols{
+                mat.set(j,i, self.data[i][j]);
+            }
+        }
+
+        mat
     }
 
     pub fn display(&self) {
@@ -29,5 +70,51 @@ impl Matrix {
             }
             println!("]");
         }
+    }
+}
+
+impl Add<&Matrix> for &Matrix{
+    type Output = Matrix;
+    fn add(self, other: &Matrix) -> Matrix {
+        let mut res = Matrix::new(self.rows, self.cols);
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                res.data[r][c] = self.data[r][c] + other.data[r][c]
+            }
+        }
+
+        res
+    }
+}
+
+impl Sub<&Matrix> for &Matrix{
+    type Output = Matrix;
+    fn sub(self, other: &Matrix) -> Matrix {
+        let mut res = Matrix::new(self.rows, self.cols);
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                res.data[r][c] = self.data[r][c] - other.data[r][c]
+            }
+        }
+
+        res
+    }
+}
+
+impl Mul<&Vector> for &Matrix{
+    type Output = Vector;
+
+    fn mul(self, other: &Vector) -> Vector {
+        todo!()
+    }
+}
+
+impl Mul<&Matrix> for &Matrix{
+    type Output = Matrix;
+
+    fn mul(self, other: &Matrix) -> Matrix {
+        todo!()
     }
 }
