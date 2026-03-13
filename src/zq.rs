@@ -1,5 +1,6 @@
 use rand::Rng;
 use std::ops::{Add, Sub, Mul, Neg};
+use crate::utils::extended_gcd;
 
 // L'algorithme de l'inverse (Euclide étendu).
 
@@ -24,6 +25,17 @@ impl Zq {
         let random_value = rng.gen_range(0..q);
 
         Zq::new(random_value, q)
+    }
+
+    pub fn inv(&self) -> Option<Zq> {
+        let (g, x, _) = extended_gcd(self.value, self.q);
+
+        if g != 1 {
+            return None;
+        }
+
+        Some(Zq::new(x, self.q))
+
     }
 
     pub fn display(&self) {
