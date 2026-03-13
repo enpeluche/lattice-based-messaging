@@ -10,7 +10,11 @@ The goal of this project is to demonstrate an end-to-end encrypted chat where se
 
 [x] March 12: Implement foundational linear algebra structures (Matrix and Vector).
 
-[ ] March 13: Refactor core structures using Rust Generics (<T>) to seamlessly support both floats and integers. Implement the modular arithmetic structure (Z_q).
+[ ] March 13:
+
+- Refactor core structures using Rust Generics (<T>) to seamlessly support both floats and integers.
+- Implement the modular arithmetic structure (Z_q).
+- Implement extended_gcd.
 
 [ ] March 14: Implement the Gram-Schmidt orthogonalization process and the LLL (Lenstra–Lenstra–Lovász) lattice reduction algorithm.
 
