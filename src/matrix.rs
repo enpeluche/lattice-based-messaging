@@ -1,8 +1,6 @@
 use std::f64;
 use rand::Rng;
-use std::ops::Add;
-use std::ops::Sub;
-use std::ops::Mul;
+use std::ops::{Add, Sub, Mul, Neg};
 
 use crate::vector::Vector;
 
@@ -88,6 +86,21 @@ impl Add<&Matrix> for &Matrix{
     }
 }
 
+impl Neg for &Matrix{
+    type Output = Matrix;
+    fn neg(self) -> Matrix {
+        let mut res = Matrix::new(self.rows, self.cols);
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                res.data[r][c] = -self.data[r][c]
+            }
+        }
+
+        res
+    }
+}
+
 impl Sub<&Matrix> for &Matrix{
     type Output = Matrix;
     fn sub(self, other: &Matrix) -> Matrix {
@@ -107,7 +120,18 @@ impl Mul<&Vector> for &Matrix{
     type Output = Vector;
 
     fn mul(self, other: &Vector) -> Vector {
-        todo!()
+        assert_eq!(self.cols, other.size);
+
+        let mut res = Vector::new(self.rows);
+        
+        for i in 0..self.rows {
+            for k in 0..other.size {
+                res.data[i] += self.data[i][k] * other.data[k];
+            }
+            
+        }
+
+        res
     }
 }
 
@@ -115,6 +139,18 @@ impl Mul<&Matrix> for &Matrix{
     type Output = Matrix;
 
     fn mul(self, other: &Matrix) -> Matrix {
-        todo!()
+        assert_eq!(self.cols, other.rows);
+
+        let mut res = Matrix::new(self.rows, other.cols);
+        
+        for i in 0..self.rows {
+            for j in 0..other.cols {
+                for k in 0..self.cols {
+                    res.data[i][j] = res.data[i][j] + self.data[i][k] * other.data[k][j];
+                }
+            }
+        }
+
+        res
     }
 }

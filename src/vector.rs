@@ -1,6 +1,4 @@
-use std::ops::Add;
-use std::ops::Sub;
-use std::ops::Mul;
+use std::ops::{Add, Sub, Mul, Neg};
 
 pub struct Vector {
     pub size: usize,
@@ -77,6 +75,20 @@ impl Mul<f64> for &Vector{
 
         for i in 0..self.size {
             res.data[i] = self.data[i] * scalar;
+        }
+
+        res
+    }
+}
+
+impl Neg for &Vector{
+    type Output = Vector;
+
+    fn neg(self) -> Vector {
+        let mut res = Vector::new(self.size);
+
+        for i in 0..self.size {
+            res.data[i] = -self.data[i];
         }
 
         res
