@@ -4,6 +4,8 @@ use std::ops::{Add, Sub, Mul, Neg};
 
 use crate::vector::Vector;
 
+
+
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
@@ -21,7 +23,7 @@ impl Matrix {
         let mut data = vec![vec![0.0; size]; size];
 
         for i in 0..size {
-            data[i][i] = 1.0;
+            data[i][i] = 1.0; // et là on aurait une méthode pour prendre le 1 du type sur lequel on travail ? genre on a un ::ONE pour i64 ou f64 ??
         }
         Self{rows: size, cols: size, data}
     }

@@ -1,96 +1,83 @@
-use std::ops::{Add, Sub, Mul, Neg};
+use std::{array, iter::Sum, ops::{Add, Mul, Neg, Sub}};
 
-pub struct Vector {
-    pub size: usize,
-    pub data: Vec<f64>,
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Vector<T, const N: usize> {
+    pub data: [T; N],
 }
 
-impl Vector {
-    pub fn new(size: usize) -> Self {
-        let data = vec![0.0; size];
+impl<T, const N: usize> Vector<T, N>
+where T: Copy + Default + Add<Output = T> + Mul<Output = T> + Sum
+{
+    pub fn new() -> Self {Self{data: [T::default(); N]}}
 
-        Self{size, data}
-    }
-
-    pub fn dot(&self, other: &Vector) -> f64{
-        assert_eq!(self.size, other.size);
-
-        let mut s = 0.0;
-
-        for i in 0..self.size {
-            s = s + self.data[i] * other.data[i];
-        }
-        s
-    }
-
-    pub fn norm(&self) -> f64{
-        self.dot(self).sqrt()
-    }
-
-    pub fn display(&self) {
-        print!("[ ");
-        for val in &self.data {
-            print!("{:>6.2} ", val);
-        }
-        println!("]");
+    pub fn dot(&self, other: &Self) -> T{
+        self.data.iter()
+                 .zip(other.data.iter())
+                 .map(|(a,b)| *a * *b)
+                 .sum()
     }
 }
 
-
-impl Add<&Vector> for &Vector{
-    type Output = Vector;
-    fn add(self, other: &Vector) -> Vector {
-        assert_eq!(self.size, other.size);
-
-        let mut res = Vector::new(self.size);
-
-        for i in 0..self.size {
-            res.data[i] = self.data[i] + other.data[i];
+impl<T, const N: usize> std::fmt::Display for Vector<T, N>
+where 
+    T: std::fmt::Display 
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[")?;
+        
+        for (i, val) in self.data.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", val)?;
         }
-
-        res
+        
+        write!(f, "]")?;
+        Ok(())
     }
 }
 
-impl Sub<&Vector> for &Vector{
-    type Output = Vector;
-    fn sub(self, other: &Vector) -> Vector {
-        assert_eq!(self.size, other.size);
-
-        let mut res = Vector::new(self.size);
-
-        for i in 0..self.size {
-            res.data[i] = self.data[i] - other.data[i];
+impl<T, const N: usize> Add<Vector<T, N>> for Vector<T, N>
+where T: Copy + Add<Output = T>
+{
+    type Output = Vector<T, N>;
+    fn add(self, other: Vector<T, N>) -> Vector<T, N> {
+        Self::Output {
+            data: array::from_fn(|i| self.data[i] + other.data[i])
         }
-
-        res
     }
 }
 
-impl Mul<f64> for &Vector{
-    type Output = Vector;
-
-    fn mul(self, scalar: f64) -> Vector {
-        let mut res = Vector::new(self.size);
-
-        for i in 0..self.size {
-            res.data[i] = self.data[i] * scalar;
+impl<T, const N: usize> Sub<Vector<T, N>> for Vector<T, N>
+where T: Copy + Sub<Output = T>
+{
+    type Output = Vector<T, N>;
+    fn sub(self, other: Vector<T, N>) -> Vector<T, N> {
+        Self::Output {
+            data: array::from_fn(|i| self.data[i] - other.data[i])
         }
-
-        res
     }
 }
 
-impl Neg for &Vector{
-    type Output = Vector;
-
-    fn neg(self) -> Vector {
-        let mut res = Vector::new(self.size);
-
-        for i in 0..self.size {
-            res.data[i] = -self.data[i];
+impl<T, const N: usize> Mul<T> for Vector<T, N>
+where T: Copy + Mul<Output = T>
+{
+    type Output = Vector<T, N>;
+    fn mul(self, scalar: T) -> Vector<T, N> {
+        Self::Output {
+            data: array::from_fn(|i| self.data[i] * scalar)
         }
+    }
+}
 
-        res
+impl<T, const N: usize> Neg for Vector<T, N>
+where T: Copy + Neg<Output = T>
+{
+    type Output = Vector<T, N>;
+
+    fn neg(self) -> Vector<T, N> {
+        Self::Output {
+            data: array::from_fn(|i| -self.data[i])
+        }
     }
 }
