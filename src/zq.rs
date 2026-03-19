@@ -1,8 +1,6 @@
 use rand::Rng;
 use std::ops::{Add, Sub, Mul, Neg, AddAssign, MulAssign, SubAssign};
 
-// TODO : implement one, zero, Display, Sum, Prod
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Zq<const Q: u64>{
     pub value: i64,
@@ -17,7 +15,23 @@ impl<const Q: u64> From<i64> for Zq<Q> {
 }
 
 impl<const Q: u64> Zq<Q> {
+    pub fn zero() -> Self {Self::new(0)}
+    pub fn one() -> Self {Self::new(1)}
+
+    pub fn is_zero(&self) -> bool {self.value==0}
+    pub fn is_one(&self) -> bool {self.value==1}
+}
+
+impl<const Q: u64> std::fmt::Display for Zq<Q> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl<const Q: u64> Zq<Q> {
     pub fn new(value: i64) -> Self {
+        assert!(Q > 0, "Modulo Q doit être > 0");
+
         let q = Q as i64;
 
         Self{value:((value % q) + q) % q}
@@ -44,11 +58,6 @@ impl<const Q: u64> Zq<Q> {
 
     pub fn is_unit(&self) -> bool {
         crate::utils::gcd(self.value, Q as i64) == 1
-    }
-
-    pub fn display(&self) {
-        print!("{} (mod {})", self.value, Q);
-        
     }
 }
 
@@ -100,5 +109,26 @@ impl<const Q: u64> SubAssign for Zq<Q> {
 impl<const Q: u64> MulAssign for Zq<Q> {
     fn mul_assign(&mut self, rhs: Self) {
         *self = *self * rhs;
+    }
+}
+
+impl<const Q: u64> std::iter::Sum for Zq<Q> {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::zero(), |a, b| a + b)
+    }
+}
+
+impl<const Q: u64> std::iter::Product for Zq<Q> {
+    fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::one(), |a, b| a * b)
+    }
+}
+
+impl<const Q: u64> std::ops::Div for Zq<Q> {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let inv = rhs.inv().expect("Erreur : division par un élément non inversible dans Zq");
+        self * inv
     }
 }
