@@ -1,5 +1,6 @@
 use rand::Rng;
 use std::ops::{Add, Sub, Mul, Neg, AddAssign, MulAssign, SubAssign};
+use num_traits::{Zero, One};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Zq<const Q: u64>{
@@ -12,6 +13,22 @@ impl<const Q: u64> Default for Zq<Q>  {
 
 impl<const Q: u64> From<i64> for Zq<Q> {
     fn from(v: i64) -> Self { Self::new(v)}
+}
+
+impl<const Q: u64> Zero for Zq<Q> {
+    fn zero() -> Self {
+        Self::new(0)
+    }
+
+    fn is_zero(&self) -> bool {
+        self.value == 0
+    }
+}
+
+impl<const Q: u64> One for Zq<Q> {
+    fn one() -> Self {
+        Self::new(1)
+    }    
 }
 
 impl<const Q: u64> Zq<Q> {
