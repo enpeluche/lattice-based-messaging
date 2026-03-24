@@ -1,40 +1,31 @@
 use std::f64;
 use rand::Rng;
 use std::ops::{Add, Sub, Mul, Neg};
+use num_traits::{Zero, One};
+use std::array;
 
 use crate::vector::Vector;
 
-
-
-pub struct Matrix {
-    pub rows: usize,
-    pub cols: usize,
-    pub data: Vec<Vec<f64>>
+// TODO: Display
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Matrix<T, const ROWS: usize, const COLS: usize> {
+    pub data: [[T; COLS]; ROWS],
 }
 
-impl Matrix {
-    pub fn new(rows: usize, cols: usize) -> Self {
-        let data = vec![vec![0.0; cols]; rows];
-
-        Self{rows, cols, data}
+impl<T, const ROWS: usize, const COLS: usize> Matrix<T, ROWS, COLS>
+where T: Default + Copy
+{
+    pub fn new() -> Self {
+        Self{data: [[T::default(); COLS]; ROWS]}
     }
 
-    pub fn identity(size: usize) -> Self {
-        let mut data = vec![vec![0.0; size]; size];
-
-        for i in 0..size {
-            data[i][i] = 1.0; // et là on aurait une méthode pour prendre le 1 du type sur lequel on travail ? genre on a un ::ONE pour i64 ou f64 ??
-        }
-        Self{rows: size, cols: size, data}
-    }
-
-    pub fn random(rows: usize, cols: usize) -> Self {
+    pub fn random() -> Self {
         let mut rng = rand::thread_rng();
         
-        let mut mat = Self::new(rows, cols);
+        let mut mat = Self::new();
 
-        for r in 0..rows {
-            for c in 0..cols {
+        for r in 0..ROWS {
+            for c in 0..COLS {
                 mat.data[r][c] = rng.r#gen::<f64>();
             }
         }
@@ -50,30 +41,41 @@ impl Matrix {
         }
     }
 
-    pub fn transpose(&self) -> Self {
-        let mut mat = Matrix::new(self.cols, self.rows);
+    pub fn transpose(&self) -> Matrix<T, COLS, ROWS> {
+        let mut mat = Matrix::<T, COLS, ROWS>::new();
 
-        for i in 0..self.rows {
-            for j in 0..self.cols{
-                mat.set(j,i, self.data[i][j]);
+        for r in 0..ROWS {
+            for c in 0..COLS{
+                mat.data[c][r] = self.data[r][c];
             }
         }
 
         mat
     }
 
-    pub fn display(&self) {
-        for row in &self.data {
-            print!("[ ");
-            for val in row {
-                print!("{:>6.2} ", val);
-            }
-            println!("]");
+}
+
+
+impl<T, const N: usize> Matrix<T, N, N>
+where 
+    T: Copy + Zero + One 
+{
+    pub fn identity() -> Self {
+        Self {
+            data: array::from_fn(|r| {
+                array::from_fn(|c| {
+                    if r == c {
+                        T::one()
+                    } else {
+                        T::zero()
+                    }
+                })
+            })
         }
     }
 }
 
-impl Add<&Matrix> for &Matrix{
+impl<T, const ROWS: usize, const COLS: usize> Add<Matrix<T, ROWS, COLS>> for Matrix<T, ROWS, COLS>{
     type Output = Matrix;
     fn add(self, other: &Matrix) -> Matrix {
         let mut res = Matrix::new(self.rows, self.cols);
@@ -88,7 +90,7 @@ impl Add<&Matrix> for &Matrix{
     }
 }
 
-impl Neg for &Matrix{
+impl<T, const ROWS: usize, const COLS: usize> Neg for &Matrix{
     type Output = Matrix;
     fn neg(self) -> Matrix {
         let mut res = Matrix::new(self.rows, self.cols);
@@ -103,7 +105,7 @@ impl Neg for &Matrix{
     }
 }
 
-impl Sub<&Matrix> for &Matrix{
+impl<T, const ROWS: usize, const COLS: usize> Sub<&Matrix> for &Matrix{
     type Output = Matrix;
     fn sub(self, other: &Matrix) -> Matrix {
         let mut res = Matrix::new(self.rows, self.cols);
@@ -118,7 +120,7 @@ impl Sub<&Matrix> for &Matrix{
     }
 }
 
-impl Mul<&Vector> for &Matrix{
+impl<T, const ROWS: usize, const COLS: usize> Mul<&Vector> for &Matrix{
     type Output = Vector;
 
     fn mul(self, other: &Vector) -> Vector {
@@ -137,13 +139,12 @@ impl Mul<&Vector> for &Matrix{
     }
 }
 
-impl Mul<&Matrix> for &Matrix{
-    type Output = Matrix;
+impl<T, const ROWS: usize, const COLS: usize> Mul<Matrix<T, I, J>> for Matrix<T, J, K>{
+    type Output = Matrix<T, I, K>;
 
-    fn mul(self, other: &Matrix) -> Matrix {
-        assert_eq!(self.cols, other.rows);
+    fn mul(self, other: Matrix) -> Matrix<T, I, K> {
 
-        let mut res = Matrix::new(self.rows, other.cols);
+        let mut res = Self::Output::new();
         
         for i in 0..self.rows {
             for j in 0..other.cols {
