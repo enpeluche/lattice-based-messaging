@@ -24,7 +24,7 @@ The goal of this project is to demonstrate an end-to-end encrypted chat where se
 
 ### Phase 3: Cryptography & LWE Implementation (March 27 - 28)
 
-[ ] March 27: Implement the ChaCha20 stream cipher for fast, secure symmetric encryption of chat payloads.
+[x] March 27: Implement the ChaCha20 stream cipher for fast, secure symmetric encryption of chat payloads.
 
 [ ] March 28: Implement the LWE (Learning With Errors) protocol for secure post-quantum key exchange.
 
